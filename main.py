@@ -6,26 +6,6 @@ window_size = (1280, 720)
 window = pygame.display.set_mode(window_size)
 pygame.display.set_caption("WhiteLight_remake")
 
-world = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-
-
 class Player:
     def __init__(self, x, y, width, height, speed):
         self.x = x
@@ -43,14 +23,8 @@ class Player:
         newX = self.x + dx
         newY = self.y + dy
 
-        if (
-                world[newX // 80][newY // 80] == 0 and
-                world[newX // 80][(newY + self.height - 1) // 80] == 0 and
-                world[(newX + self.width - 1) // 80][newY // 80] == 0 and
-                world[(newX + self.width - 1) // 80][(newY + self.height - 1) // 80] == 0
-        ):
-            self.x = newX
-            self.y = newY
+        self.x = newX
+        self.y = newY
 
     def draw(self):
         pygame.draw.rect(
@@ -90,11 +64,6 @@ while (run):
     playerInputHandler.update(pygame.key.get_pressed())
 
     window.fill((0, 0, 0))
-
-    for i in range(len(world)):
-        for j in range(len(world[i])):
-            if (world[i][j] == 1):
-                pygame.draw.rect(window, (255, 0, 0), (i * 80, j * 80, 80, 80))
 
     player.draw()
     pygame.display.update()
