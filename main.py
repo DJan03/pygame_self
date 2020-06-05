@@ -1,4 +1,5 @@
 import pygame
+from PIL import Image
 
 pygame.init()
 
@@ -6,81 +7,64 @@ window_size = (1280, 720)
 window = pygame.display.set_mode(window_size)
 pygame.display.set_caption("WhiteLight_remake")
 
-ROOM_EMPTY = 1
-ROOM_X = 2
-
-room_lib = {
-    ROOM_EMPTY: [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1]
-    ],
-    ROOM_X: [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 0, 1, 1, 1, 0, 0, 1],
-        [1, 0, 0, 1, 1, 1, 0, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1]
-    ]
-}
-
 
 class World:
     def __init__(self):
-        self.rooms = [
-            [None, None, None],
-            [room_lib[ROOM_EMPTY], room_lib[ROOM_X], room_lib[ROOM_EMPTY]],
-            [None, room_lib[ROOM_X], None]
-        ]
-        self.x = 1
-        self.y = 1
+        self.x = 0
+        self.y = 0
+        self.room_size_x = 17
+        self.room_size_y = 10
+
+        img = Image.open("map.png")
+        pixels = img.load()
+        x, y = img.size
 
         self.size = 80
 
-    def get_room(self):
-        return self.rooms[self.x][self.y]
-
-    def is_collised(self, x, y, w, h):
-        x0 = x // 80
-        y0 = y // 80
-        x1 = (x + w - 1) // 80
-        y1 = (y + h - 1) // 80
-
-        room = self.rooms[self.x][self.y]
-        return (room[x0][y0] == 0 and room[x1][y0] == 0 and
-                room[x0][y1] == 0 and room[x1][y1] == 0)
+        self.world_map = [[0 for _ in range(y)] for _ in range(x)]
+        for i in range(x):
+            for j in range(y):
+                self.world_map[i][j] = 1 if (pixels[i, j] == (0, 0, 0)) else 0
 
     def draw(self):
-        room = list(self.rooms[self.x][self.y])
+        x0 = (self.room_size_x - 1) * self.x
+        y0 = (self.room_size_y - 1) * self.y
+        x1 = (self.room_size_x - 1) * (self.x + 1) + 1
+        y1 = (self.room_size_y - 1) * (self.y + 1) + 1
+        for i in range(x0, x1):
+            for j in range(y0, y1):
+                if (self.world_map[i][j] == 1):
+                    pygame.draw.rect(
+                        window, (255, 0, 0), (
+                            (i - x0) * self.size - self.size // 2,
+                            (j - y0) * self.size - self.size // 2,
+                            self.size, self.size
+                        )
+                    )
 
-        for i in range(len(room)):
-            for j in range(len(room[0])):
-                if (room[i][j] == 1):
-                    pygame.draw.rect(window, (255, 0, 0), (i * self.size, j * self.size, self.size, self.size))
+    def check_collision(self, x, y, w, h):
+        x0 = (x + self.size // 2) // self.size + (self.room_size_x - 1) * self.x
+        y0 = (y + self.size // 2) // self.size + (self.room_size_y - 1) * self.y
+        x1 = (x + w - 1 + self.size // 2) // self.size + (self.room_size_x - 1) * self.x
+        y1 = (y + h - 1 + self.size // 2) // self.size + (self.room_size_y - 1) * self.y
+
+        return (self.world_map[x0][y0] == 0 and self.world_map[x1][y0] == 0 and
+                self.world_map[x0][y1] == 0 and self.world_map[x1][y1] == 0)
+
+    def update_visible_room(self, x, y, w, h):
+        x0 = x
+        y0 = y
+        x1 = x + w
+        y1 = y + h
+
+        if (x0 < 0):
+            self.x -= 1
+        if (y0 < 0):
+            self.y -= 1
+        if (x1 >= window_size[0]):
+            self.x += 1
+        if (y1 >= window_size[1]):
+            self.y += 1
 
 
 world = World()
@@ -103,9 +87,10 @@ class Player:
         newX = self.x + dx
         newY = self.y + dy
 
-        if (world.is_collised(newX, newY, self.width, self.height)):
-            self.x = newX
-            self.y = newY
+        if (world.check_collision(newX, newY, self.width, self.height)):
+            world.update_visible_room(newX, newY, self.width, self.height)
+            self.x = newX % (window_size[0] - self.width)
+            self.y = newY % (window_size[1] - self.height)
 
     def draw(self):
         pygame.draw.rect(
@@ -130,7 +115,7 @@ class InputHanlder:
             self.actor.move((0, 1))
 
 
-player = Player(500, 500, 60, 90, 10)
+player = Player(100, 100, 60, 90, 10)
 playerInputHandler = InputHanlder(player)
 
 run = True
@@ -149,5 +134,7 @@ while (run):
     world.draw()
     player.draw()
     pygame.display.update()
+
+    # print((player.x + world.size // 2) // world.size + (world.room_size_x - 1) * world.x)
 
 pygame.quit()
