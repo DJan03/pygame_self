@@ -26,6 +26,14 @@ class World:
             for j in range(y):
                 self.world_map[i][j] = 1 if (pixels[i, j] == (0, 0, 0)) else 0
 
+        self.images = []
+        tiles = pygame.transform.scale(pygame.image.load("tiles.png"), (self.size * 2, self.size))
+        for i in range(2):
+            for j in range(1):
+                surf = pygame.Surface((self.size, self.size))
+                surf.blit(tiles, (-self.size * i, -self.size * j))
+                self.images.append(surf)
+
     def draw(self):
         x0 = (self.room_size_x - 1) * self.x
         y0 = (self.room_size_y - 1) * self.y
@@ -33,14 +41,10 @@ class World:
         y1 = (self.room_size_y - 1) * (self.y + 1) + 1
         for i in range(x0, x1):
             for j in range(y0, y1):
-                if (self.world_map[i][j] == 1):
-                    pygame.draw.rect(
-                        window, (255, 0, 0), (
-                            (i - x0) * self.size - self.size // 2,
-                            (j - y0) * self.size - self.size // 2,
-                            self.size, self.size
-                        )
-                    )
+                window.blit(self.images[self.world_map[i][j]],
+                            ((i - x0) * self.size - self.size // 2,
+                             (j - y0) * self.size - self.size // 2)
+                            )
 
     def check_collision(self, x, y, w, h):
         x0 = (x + self.size // 2) // self.size + (self.room_size_x - 1) * self.x
