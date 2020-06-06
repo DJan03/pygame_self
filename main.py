@@ -82,6 +82,13 @@ class Player:
         self.height = height
         self.speed = speed
 
+        self.maxHealth = 100
+        self.health = 100
+        self.maxWarm = 100
+        self.warm = 100
+        self.maxCoins = 3
+        self.coins = 3
+
     def move(self, direction):
         dx, dy = direction
 
@@ -103,6 +110,31 @@ class Player:
             (self.x, self.y, self.width, self.height)
         )
 
+    def draw_parametrs(self):
+        pygame.draw.rect(window, (64, 0, 0), (20, 20, 300, 40))
+        pygame.draw.rect(
+            window, (255, 0, 0),
+            (20, 20,
+             self.health * 3, 40)
+        )
+
+        pygame.draw.rect(window, (0, 0, 64), (20, 70, 200, 20))
+        pygame.draw.rect(
+            window, (0, 0, 255),
+            (20, 70,
+             self.warm * 2, 20)
+        )
+
+        for i in range(self.maxCoins):
+            pygame.draw.rect(window, (64, 64, 0), (240 + i * 30, 70, 20, 20))
+
+        for i in range(self.coins):
+            pygame.draw.rect(
+                window, (255, 255, 0),
+                (240 + i * 30, 70,
+                 20, 20)
+            )
+
 
 class InputHanlder:
     def __init__(self, actor):
@@ -117,6 +149,12 @@ class InputHanlder:
             self.actor.move((0, -1))
         if (keys[pygame.K_DOWN]):
             self.actor.move((0, 1))
+        if (keys[pygame.K_1]):
+            self.actor.health -= 1
+        if (keys[pygame.K_2]):
+            self.actor.warm -= 1
+        if (keys[pygame.K_3]):
+            self.actor.coins -= 1
 
 
 player = Player(100, 100, 60, 90, 10)
@@ -137,8 +175,7 @@ while (run):
 
     world.draw()
     player.draw()
+    player.draw_parametrs()
     pygame.display.update()
-
-    # print((player.x + world.size // 2) // world.size + (world.room_size_x - 1) * world.x)
 
 pygame.quit()
